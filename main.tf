@@ -2,7 +2,7 @@ data "aws_region" "current" {}
 
 resource "aws_lambda_function" "xosphere_event_relay_lambda" {
   s3_bucket = "xosphere-io-releases-${data.aws_region.current.name}"
-  s3_key = "event-router-lambda-${var.xosphere_version}.zip"
+  s3_key = "event-relay-lambda-${var.xosphere_version}.zip"
   description = "Xosphere Event Relay"
   environment {
     variables = {
