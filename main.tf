@@ -158,6 +158,7 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_xogroup_enabler_clou
       "xosphere.io/instance-orchestrator/wait-period-in-mins",
       "xosphere.io/instance-orchestrator/enable-burstable",
       "xosphere.io/instance-orchestrator/allowed-instance-types",
+      "xosphere.io/instance-orchestrator/excluded-instance-types",
       "xosphere.io/instance-orchestrator/min-on-demand",
       "xosphere.io/instance-orchestrator/percent-on-demand",
       "xosphere.io/instance-orchestrator/instance-launch-topic-arn",
