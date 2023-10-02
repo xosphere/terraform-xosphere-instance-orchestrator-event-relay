@@ -11,10 +11,11 @@ resource "aws_lambda_function" "xosphere_event_relay_lambda" {
     }
   }
   function_name = "xosphere-event-relay-lambda"
-  handler = "event-relay"
+  handler = "bootstrap"
   memory_size = 128
   role = var.event_relay_iam_role_arn
-  runtime = "go1.x"
+  runtime = "provided.al2"
+  architectures = [ "arm64" ]
   timeout = 180
   tags = var.tags
   depends_on = [ aws_cloudwatch_log_group.xosphere_event_relay_cloudwatch_log_group ]
