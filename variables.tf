@@ -90,7 +90,12 @@ variable "instance_orchestrator_terminator_revert_tag_cloudwatch_event_lambda_pe
   default = null
 }
 
-variable "instance_orchestrator_xogroup_enabler_cloudwatch_event_lambda_permission_name_override" {
+variable "instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_lambda_permission_name_override" {
+  description = "An explicit name to use"
+  default = null
+}
+
+variable "instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_lambda_permission_name_override" {
   description = "An explicit name to use"
   default = null
 }
