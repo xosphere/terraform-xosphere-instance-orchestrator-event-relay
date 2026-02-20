@@ -39,7 +39,8 @@ resource "aws_cloudwatch_event_rule" "xosphere_terminator_revert_tag_cloudwatch_
   ],
   "detail": {
     "changed-tag-keys": [
-      "xosphere.io/instance-orchestrator/revert"
+      "xosphere.io/instance-orchestrator/revert",
+      "xosphere:instance-orchestrator:revert"
     ],
     "service": [
       "ec2"
@@ -111,7 +112,8 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_scheduler_tag_change
   ],
   "detail": {
     "changed-tag-keys": [
-      "xosphere.io/instance-orchestrator/schedule-enabled"
+      "xosphere.io/instance-orchestrator/schedule-enabled",
+      "xosphere:instance-orchestrator:schedule-enabled"
     ],
     "service": [
       "ec2"
@@ -140,9 +142,9 @@ resource "aws_lambda_permission" "instance_orchestrator_scheduler_tag_change_clo
   statement_id = var.instance_orchestrator_scheduler_tag_change_cloudwatch_event_lambda_permission_name_override == null ? "AllowExecutionFromCloudWatch" : var.instance_orchestrator_scheduler_tag_change_cloudwatch_event_lambda_permission_name_override
 }
 
-resource "aws_cloudwatch_event_rule" "instance_orchestrator_xogroup_enabler_cloudwatch_event_rule" {
-  name = "xosphere-xogroup-enabler-tag-event-rule"
-  description = "CloudWatch Event trigger for remove xogroup-enabled tag"
+resource "aws_cloudwatch_event_rule" "instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_rule" {
+  name = "xosphere-xogroup-enabled-tag-slashes-event-rule"
+  description = "CloudWatch Event trigger for remove xogroup-enabled tag (slashes)"
   event_pattern = <<PATTERN
 {
   "source": [
@@ -187,18 +189,79 @@ PATTERN
   tags = var.tags
 }
 
-resource "aws_cloudwatch_event_target" "instance_orchestrator_xogroup_enabler_cloudwatch_event_target" {
+resource "aws_cloudwatch_event_target" "instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_target" {
   arn = aws_lambda_function.xosphere_event_relay_lambda.arn
-  rule = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabler_cloudwatch_event_rule.name
-  target_id = "xosphere-xogroup-enabled-tag-change-cloudwatch-rule"
+  rule = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_rule.name
+  target_id = "xosphere-xogroup-enabled-tag-slashes-change-cloudwatch-rule"
 }
 
-resource "aws_lambda_permission" "instance_orchestrator_xogroup_enabler_cloudwatch_event_lambda_permission" {
+resource "aws_lambda_permission" "instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_lambda_permission" {
   action = "lambda:InvokeFunction"
   function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
   principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabler_cloudwatch_event_rule.arn
-  statement_id = var.instance_orchestrator_xogroup_enabler_cloudwatch_event_lambda_permission_name_override == null ? "AllowXogroupEnablerExecutionFromCloudWatch" : var.instance_orchestrator_xogroup_enabler_cloudwatch_event_lambda_permission_name_override
+  source_arn = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_rule.arn
+  statement_id = var.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_lambda_permission_name_override == null ? "AllowXogroupEnabledSlashesExecutionFromCloudWatch" : var.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_lambda_permission_name_override
+}
+
+resource "aws_cloudwatch_event_rule" "instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_rule" {
+  name = "xosphere-xogroup-enabled-tag-colons-event-rule"
+  description = "CloudWatch Event trigger for remove xogroup-enabled tag (colons)"
+  event_pattern = <<PATTERN
+{
+  "source": [
+    "aws.tag"
+  ],
+  "detail-type": [
+    "Tag Change on Resource"
+  ],
+  "detail": {
+    "changed-tag-keys": [
+      "xosphere:instance-orchestrator:xogroup-enabled",
+      "xosphere:instance-orchestrator:bid-multiplier",
+      "xosphere:instance-orchestrator:prefer-reserved-instances",
+      "xosphere:instance-orchestrator:wait-period-in-mins",
+      "xosphere:instance-orchestrator:enable-burstable",
+      "xosphere:instance-orchestrator:allowed-instance-types",
+      "xosphere:instance-orchestrator:excluded-instance-types",
+      "xosphere:instance-orchestrator:min-on-demand",
+      "xosphere:instance-orchestrator:percent-on-demand",
+      "xosphere:instance-orchestrator:instance-launch-topic-arn",
+      "xosphere:instance-orchestrator:instance-launch-error-topic-arn",
+      "xosphere:instance-orchestrator:instance-terminate-topic-arn",
+      "xosphere:instance-orchestrator:instance-terminate-error-topic-arn",
+      "xosphere:instance-orchestrator:alert-topic-arn",
+      "xosphere:instance-orchestrator:xogroup-name",
+      "xosphere:instance-orchestrator:parallel-processing",
+      "xosphere:instance-orchestrator:xogroup-thread-count",
+      "xosphere:instance-orchestrator:prefer-savings-plans",
+      "xosphere:instance-orchestrator:max-spot-pool-percent",
+      "xosphere:instance-orchestrator:ignore-health-check"
+    ],
+    "service": [
+      "ec2"
+    ],
+    "resource-type": [
+      "instance"
+    ]
+  }
+}
+PATTERN
+  is_enabled = true
+  tags = var.tags
+}
+
+resource "aws_cloudwatch_event_target" "instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_target" {
+  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_rule.name
+  target_id = "xosphere-xogroup-enabled-tag-colons-change-cloudwatch-rule"
+}
+
+resource "aws_lambda_permission" "instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_lambda_permission" {
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
+  principal = "events.amazonaws.com"
+  source_arn = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_rule.arn
+  statement_id = var.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_lambda_permission_name_override == null ? "AllowXogroupEnabledColonsExecutionFromCloudWatch" : var.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_lambda_permission_name_override
 }
 
 resource "aws_cloudwatch_event_rule" "instance_orchestrator_group_inspector_tag_change_cloudwatch_event_rule" {
@@ -215,7 +278,8 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_group_inspector_tag_
   "detail": {
     "changed-tag-keys": [
       "Name",
-      "xosphere.io/instance-orchestrator/xogroup-name"
+      "xosphere.io/instance-orchestrator/xogroup-name",
+      "xosphere:instance-orchestrator:xogroup-name"
     ],
     "service": [
       "ec2"
