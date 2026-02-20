@@ -14,7 +14,7 @@ resource "aws_lambda_function" "xosphere_event_relay_lambda" {
   handler = "bootstrap"
   memory_size = 128
   role = var.event_relay_iam_role_arn
-  runtime = "provided.al2"
+  runtime = "provided.al2023"
   architectures = [ "arm64" ]
   timeout = 180
   tags = var.tags
