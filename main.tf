@@ -277,3 +277,118 @@ resource "aws_lambda_permission" "instance_orchestrator_group_inspector_ec2_stat
   source_arn = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_rule.arn
   statement_id = var.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_lambda_permission_name_override == null ? "AllowGroupInspectorExecutionFromCloudWatchEc2StateChange" : var.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_lambda_permission_name_override
 }
+# --- Fargate ECS Event Rules ---
+
+resource "aws_cloudwatch_event_rule" "xosphere_fargate_spot_termination_event_rule" {
+  name = "xosphere-fargate-spot-termination-event-rule"
+  description = "Triggers event relay on FARGATE_SPOT Spot interruption"
+  event_pattern = <<PATTERN
+{
+  "source": [
+    "aws.ecs"
+  ],
+  "detail-type": [
+    "ECS Task State Change"
+  ],
+  "detail": {
+    "capacityProviderName": [
+      "FARGATE_SPOT"
+    ],
+    "stopCode": [
+      "SpotInterruption"
+    ]
+  }
+}
+PATTERN
+  is_enabled = true
+  tags = var.tags
+}
+
+resource "aws_cloudwatch_event_target" "xosphere_fargate_spot_termination_event_target" {
+  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule = aws_cloudwatch_event_rule.xosphere_fargate_spot_termination_event_rule.name
+  target_id = "xosphere-fargate-spot-termination-rule"
+}
+
+resource "aws_lambda_permission" "xosphere_fargate_spot_termination_event_lambda_permission" {
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
+  principal = "events.amazonaws.com"
+  source_arn = aws_cloudwatch_event_rule.xosphere_fargate_spot_termination_event_rule.arn
+  statement_id = "AllowFargateSpotTerminationExecutionFromCloudWatch"
+}
+
+resource "aws_cloudwatch_event_rule" "xosphere_fargate_spot_recovery_event_rule" {
+  name = "xosphere-fargate-spot-recovery-event-rule"
+  description = "Triggers event relay when a FARGATE_SPOT task reaches RUNNING (Spot recovery)"
+  event_pattern = <<PATTERN
+{
+  "source": [
+    "aws.ecs"
+  ],
+  "detail-type": [
+    "ECS Task State Change"
+  ],
+  "detail": {
+    "lastStatus": [
+      "RUNNING"
+    ],
+    "capacityProviderName": [
+      "FARGATE_SPOT"
+    ]
+  }
+}
+PATTERN
+  is_enabled = true
+  tags = var.tags
+}
+
+resource "aws_cloudwatch_event_target" "xosphere_fargate_spot_recovery_event_target" {
+  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule = aws_cloudwatch_event_rule.xosphere_fargate_spot_recovery_event_rule.name
+  target_id = "xosphere-fargate-spot-recovery-rule"
+}
+
+resource "aws_lambda_permission" "xosphere_fargate_spot_recovery_event_lambda_permission" {
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
+  principal = "events.amazonaws.com"
+  source_arn = aws_cloudwatch_event_rule.xosphere_fargate_spot_recovery_event_rule.arn
+  statement_id = "AllowFargateSpotRecoveryExecutionFromCloudWatch"
+}
+
+resource "aws_cloudwatch_event_rule" "xosphere_fargate_placement_failure_event_rule" {
+  name = "xosphere-fargate-placement-failure-event-rule"
+  description = "Triggers event relay on FARGATE_SPOT placement failure"
+  event_pattern = <<PATTERN
+{
+  "source": [
+    "aws.ecs"
+  ],
+  "detail-type": [
+    "ECS Service Action"
+  ],
+  "detail": {
+    "eventName": [
+      "SERVICE_TASK_PLACEMENT_FAILURE"
+    ]
+  }
+}
+PATTERN
+  is_enabled = true
+  tags = var.tags
+}
+
+resource "aws_cloudwatch_event_target" "xosphere_fargate_placement_failure_event_target" {
+  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule = aws_cloudwatch_event_rule.xosphere_fargate_placement_failure_event_rule.name
+  target_id = "xosphere-fargate-placement-failure-rule"
+}
+
+resource "aws_lambda_permission" "xosphere_fargate_placement_failure_event_lambda_permission" {
+  action = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
+  principal = "events.amazonaws.com"
+  source_arn = aws_cloudwatch_event_rule.xosphere_fargate_placement_failure_event_rule.arn
+  statement_id = "AllowFargatePlacementFailureExecutionFromCloudWatch"
+}
