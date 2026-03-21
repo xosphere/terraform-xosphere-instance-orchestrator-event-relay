@@ -39,7 +39,8 @@ resource "aws_cloudwatch_event_rule" "xosphere_terminator_revert_tag_cloudwatch_
   ],
   "detail": {
     "changed-tag-keys": [
-      "xosphere.io/instance-orchestrator/revert"
+      "xosphere.io/instance-orchestrator/revert",
+      "xosphere:instance-orchestrator:revert"
     ],
     "service": [
       "ec2"
@@ -111,7 +112,8 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_scheduler_tag_change
   ],
   "detail": {
     "changed-tag-keys": [
-      "xosphere.io/instance-orchestrator/schedule-enabled"
+      "xosphere.io/instance-orchestrator/schedule-enabled",
+      "xosphere:instance-orchestrator:schedule-enabled"
     ],
     "service": [
       "ec2"
@@ -172,7 +174,27 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_xogroup_enabler_clou
       "xosphere.io/instance-orchestrator/xogroup-thread-count",
       "xosphere.io/instance-orchestrator/prefer-savings-plans",
       "xosphere.io/instance-orchestrator/max-spot-pool-percent",
-      "xosphere.io/instance-orchestrator/ignore-health-check"
+      "xosphere.io/instance-orchestrator/ignore-health-check",
+      "xosphere:instance-orchestrator:xogroup-enabled",
+      "xosphere:instance-orchestrator:bid-multiplier",
+      "xosphere:instance-orchestrator:prefer-reserved-instances",
+      "xosphere:instance-orchestrator:wait-period-in-mins",
+      "xosphere:instance-orchestrator:enable-burstable",
+      "xosphere:instance-orchestrator:allowed-instance-types",
+      "xosphere:instance-orchestrator:excluded-instance-types",
+      "xosphere:instance-orchestrator:min-on-demand",
+      "xosphere:instance-orchestrator:percent-on-demand",
+      "xosphere:instance-orchestrator:instance-launch-topic-arn",
+      "xosphere:instance-orchestrator:instance-launch-error-topic-arn",
+      "xosphere:instance-orchestrator:instance-terminate-topic-arn",
+      "xosphere:instance-orchestrator:instance-terminate-error-topic-arn",
+      "xosphere:instance-orchestrator:alert-topic-arn",
+      "xosphere:instance-orchestrator:xogroup-name",
+      "xosphere:instance-orchestrator:parallel-processing",
+      "xosphere:instance-orchestrator:xogroup-thread-count",
+      "xosphere:instance-orchestrator:prefer-savings-plans",
+      "xosphere:instance-orchestrator:max-spot-pool-percent",
+      "xosphere:instance-orchestrator:ignore-health-check"
     ],
     "service": [
       "ec2"
@@ -215,7 +237,8 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_group_inspector_tag_
   "detail": {
     "changed-tag-keys": [
       "Name",
-      "xosphere.io/instance-orchestrator/xogroup-name"
+      "xosphere.io/instance-orchestrator/xogroup-name",
+      "xosphere:instance-orchestrator:xogroup-name"
     ],
     "service": [
       "ec2"
@@ -277,6 +300,7 @@ resource "aws_lambda_permission" "instance_orchestrator_group_inspector_ec2_stat
   source_arn = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_rule.arn
   statement_id = var.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_lambda_permission_name_override == null ? "AllowGroupInspectorExecutionFromCloudWatchEc2StateChange" : var.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_lambda_permission_name_override
 }
+
 # --- Fargate ECS Event Rules ---
 
 resource "aws_cloudwatch_event_rule" "xosphere_fargate_spot_termination_event_rule" {
