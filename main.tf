@@ -1,34 +1,34 @@
 data "aws_region" "current" {}
 
 resource "aws_lambda_function" "xosphere_event_relay_lambda" {
-  s3_bucket = "xosphere-io-releases-${data.aws_region.current.name}"
-  s3_key = "event-relay-lambda-${var.xosphere_version}.zip"
+  s3_bucket   = "xosphere-io-releases-${data.aws_region.current.name}"
+  s3_key      = "event-relay-lambda-${var.xosphere_version}.zip"
   description = "Xosphere Event Relay"
   environment {
     variables = {
       EVENT_ROUTER_SQS_URL = var.event_router_sqs_url
-      INSTALLED_REGION: var.installed_region
+      INSTALLED_REGION : var.installed_region
     }
   }
   function_name = "xosphere-event-relay-lambda"
-  handler = "bootstrap"
-  memory_size = 128
-  role = var.event_relay_iam_role_arn
-  runtime = "provided.al2023"
-  architectures = [ "arm64" ]
-  timeout = 180
-  tags = var.tags
-  depends_on = [ aws_cloudwatch_log_group.xosphere_event_relay_cloudwatch_log_group ]
+  handler       = "bootstrap"
+  memory_size   = 128
+  role          = var.event_relay_iam_role_arn
+  runtime       = "provided.al2023"
+  architectures = ["arm64"]
+  timeout       = 180
+  tags          = var.tags
+  depends_on    = [aws_cloudwatch_log_group.xosphere_event_relay_cloudwatch_log_group]
 }
 
 resource "aws_cloudwatch_log_group" "xosphere_event_relay_cloudwatch_log_group" {
-  name = "/aws/lambda/xosphere-event-relay-lambda"
+  name              = "/aws/lambda/xosphere-event-relay-lambda"
   retention_in_days = 30
 }
 
 resource "aws_cloudwatch_event_rule" "xosphere_terminator_revert_tag_cloudwatch_event_rule" {
-  name = "xosphere-terminator-revert-tag-event-rule"
-  description = "CloudWatch Event trigger for Terminator on revert tag value change"
+  name          = "xosphere-terminator-revert-tag-event-rule"
+  description   = "CloudWatch Event trigger for Terminator on revert tag value change"
   event_pattern = <<PATTERN
 {
   "source": [
@@ -51,26 +51,26 @@ resource "aws_cloudwatch_event_rule" "xosphere_terminator_revert_tag_cloudwatch_
   }
 }
 PATTERN
-  is_enabled = true
-  tags = var.tags
+  is_enabled    = true
+  tags          = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "xosphere_terminator_revert_tag_cloudwatch_event_target" {
-  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
-  rule = aws_cloudwatch_event_rule.xosphere_terminator_revert_tag_cloudwatch_event_rule.name
+  arn       = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule      = aws_cloudwatch_event_rule.xosphere_terminator_revert_tag_cloudwatch_event_rule.name
   target_id = "xosphere-terminator-revert-tag-change-cloudwatch-rule"
 }
 
 resource "aws_lambda_permission" "instance_orchestrator_terminator_revert_tag_cloudwatch_event_lambda_permission" {
-  action = "lambda:InvokeFunction"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
-  principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.xosphere_terminator_revert_tag_cloudwatch_event_rule.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.xosphere_terminator_revert_tag_cloudwatch_event_rule.arn
 }
 
 resource "aws_cloudwatch_event_rule" "xosphere_terminator_cloudwatch_event_rule" {
-  name = "xosphere-terminator-spot-termination-event-rule"
-  description = "CloudWatch Event trigger for Spot termination notifications for Terminator"
+  name          = "xosphere-terminator-spot-termination-event-rule"
+  description   = "CloudWatch Event trigger for Spot termination notifications for Terminator"
   event_pattern = <<PATTERN
 {
   "source": [
@@ -82,26 +82,26 @@ resource "aws_cloudwatch_event_rule" "xosphere_terminator_cloudwatch_event_rule"
   ]
 }
 PATTERN
-  is_enabled = true
-  tags = var.tags
+  is_enabled    = true
+  tags          = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "xosphere_terminator_cloudwatch_event_target" {
-  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
-  rule = aws_cloudwatch_event_rule.xosphere_terminator_cloudwatch_event_rule.name
+  arn       = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule      = aws_cloudwatch_event_rule.xosphere_terminator_cloudwatch_event_rule.name
   target_id = "xosphere-terminator-cloudwatch-rule"
 }
 
 resource "aws_lambda_permission" "instance_orchestrator_terminator_cloudwatch_event_lambda_permission" {
-  action = "lambda:InvokeFunction"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
-  principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.xosphere_terminator_cloudwatch_event_rule.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.xosphere_terminator_cloudwatch_event_rule.arn
 }
 
 resource "aws_cloudwatch_event_rule" "instance_orchestrator_scheduler_tag_change_event_rule" {
-  name = "xosphere-scheduler-revert-tag-event-rule"
-  description = "CloudWatch Event trigger for Scheduler on schedule-enabled tag value change"
+  name          = "xosphere-scheduler-revert-tag-event-rule"
+  description   = "CloudWatch Event trigger for Scheduler on schedule-enabled tag value change"
   event_pattern = <<PATTERN
 {
   "source": [
@@ -124,27 +124,27 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_scheduler_tag_change
   }
 }
 PATTERN
-  is_enabled = true
-  tags = var.tags
+  is_enabled    = true
+  tags          = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "instance_orchestrator_scheduler_tag_chance_cloudwatch_event_target" {
-  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
-  rule = aws_cloudwatch_event_rule.instance_orchestrator_scheduler_tag_change_event_rule.name
+  arn       = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule      = aws_cloudwatch_event_rule.instance_orchestrator_scheduler_tag_change_event_rule.name
   target_id = "xosphere-scheduler-enabled-tag-change-cloudwatch-rule"
 }
 
 resource "aws_lambda_permission" "instance_orchestrator_scheduler_tag_change_cloudwatch_event_lambda_permission" {
-  action = "lambda:InvokeFunction"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
-  principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.instance_orchestrator_scheduler_tag_change_event_rule.arn
-  statement_id = var.instance_orchestrator_scheduler_tag_change_cloudwatch_event_lambda_permission_name_override == null ? "AllowExecutionFromCloudWatch" : var.instance_orchestrator_scheduler_tag_change_cloudwatch_event_lambda_permission_name_override
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.instance_orchestrator_scheduler_tag_change_event_rule.arn
+  statement_id  = var.instance_orchestrator_scheduler_tag_change_cloudwatch_event_lambda_permission_name_override == null ? "AllowExecutionFromCloudWatch" : var.instance_orchestrator_scheduler_tag_change_cloudwatch_event_lambda_permission_name_override
 }
 
 resource "aws_cloudwatch_event_rule" "instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_rule" {
-  name = "xosphere-xogroup-enabled-tag-slashes-event-rule"
-  description = "CloudWatch Event trigger for remove xogroup-enabled tag (slashes)"
+  name          = "xosphere-xogroup-enabled-tag-slashes-event-rule"
+  description   = "CloudWatch Event trigger for remove xogroup-enabled tag (slashes)"
   event_pattern = <<PATTERN
 {
   "source": [
@@ -185,27 +185,27 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_xogroup_enabled_slas
   }
 }
 PATTERN
-  is_enabled = true
-  tags = var.tags
+  is_enabled    = true
+  tags          = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_target" {
-  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
-  rule = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_rule.name
+  arn       = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule      = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_rule.name
   target_id = "xosphere-xogroup-enabled-tag-slashes-change-cloudwatch-rule"
 }
 
 resource "aws_lambda_permission" "instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_lambda_permission" {
-  action = "lambda:InvokeFunction"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
-  principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_rule.arn
-  statement_id = var.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_lambda_permission_name_override == null ? "AllowXogroupEnabledSlashesExecutionFromCloudWatch" : var.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_lambda_permission_name_override
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_rule.arn
+  statement_id  = var.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_lambda_permission_name_override == null ? "AllowXogroupEnabledSlashesExecutionFromCloudWatch" : var.instance_orchestrator_xogroup_enabled_slashes_cloudwatch_event_lambda_permission_name_override
 }
 
 resource "aws_cloudwatch_event_rule" "instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_rule" {
-  name = "xosphere-xogroup-enabled-tag-colons-event-rule"
-  description = "CloudWatch Event trigger for remove xogroup-enabled tag (colons)"
+  name          = "xosphere-xogroup-enabled-tag-colons-event-rule"
+  description   = "CloudWatch Event trigger for remove xogroup-enabled tag (colons)"
   event_pattern = <<PATTERN
 {
   "source": [
@@ -246,27 +246,27 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_xogroup_enabled_colo
   }
 }
 PATTERN
-  is_enabled = true
-  tags = var.tags
+  is_enabled    = true
+  tags          = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_target" {
-  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
-  rule = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_rule.name
+  arn       = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule      = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_rule.name
   target_id = "xosphere-xogroup-enabled-tag-colons-change-cloudwatch-rule"
 }
 
 resource "aws_lambda_permission" "instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_lambda_permission" {
-  action = "lambda:InvokeFunction"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
-  principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_rule.arn
-  statement_id = var.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_lambda_permission_name_override == null ? "AllowXogroupEnabledColonsExecutionFromCloudWatch" : var.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_lambda_permission_name_override
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_rule.arn
+  statement_id  = var.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_lambda_permission_name_override == null ? "AllowXogroupEnabledColonsExecutionFromCloudWatch" : var.instance_orchestrator_xogroup_enabled_colons_cloudwatch_event_lambda_permission_name_override
 }
 
 resource "aws_cloudwatch_event_rule" "instance_orchestrator_group_inspector_tag_change_cloudwatch_event_rule" {
-  name = "xosphere-group-inspector-tag-event-rule"
-  description = "CloudWatch Event trigger for Inspector on xogroup-name and Name tag value change"
+  name          = "xosphere-group-inspector-tag-event-rule"
+  description   = "CloudWatch Event trigger for Inspector on xogroup-name and Name tag value change"
   event_pattern = <<PATTERN
 {
   "source": [
@@ -290,27 +290,27 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_group_inspector_tag_
   }
 }
 PATTERN
-  is_enabled = true
-  tags = var.tags
+  is_enabled    = true
+  tags          = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "instance_orchestrator_group_inspector_tag_change_cloudwatch_event_target" {
-  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
-  rule = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_tag_change_cloudwatch_event_rule.name
+  arn       = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule      = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_tag_change_cloudwatch_event_rule.name
   target_id = "xosphere-inspector-tag-change-cloudwatch-rule"
 }
 
 resource "aws_lambda_permission" "instance_orchestrator_group_inspector_tag_change_cloudwatch_event_lambda_permission" {
-  action = "lambda:InvokeFunction"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
-  principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_tag_change_cloudwatch_event_rule.arn
-  statement_id = var.instance_orchestrator_group_inspector_tag_change_cloudwatch_event_lambda_permission_name_override == null ? "AllowGroupInspectorExecutionFromCloudWatch" : var.instance_orchestrator_group_inspector_tag_change_cloudwatch_event_lambda_permission_name_override
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_tag_change_cloudwatch_event_rule.arn
+  statement_id  = var.instance_orchestrator_group_inspector_tag_change_cloudwatch_event_lambda_permission_name_override == null ? "AllowGroupInspectorExecutionFromCloudWatch" : var.instance_orchestrator_group_inspector_tag_change_cloudwatch_event_lambda_permission_name_override
 }
 
 resource "aws_cloudwatch_event_rule" "instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_rule" {
-  name = "xosphere-group-inspector-ec2-state-change-event-rule"
-  description = "CloudWatch Event trigger for EC2 state change"
+  name          = "xosphere-group-inspector-ec2-state-change-event-rule"
+  description   = "CloudWatch Event trigger for EC2 state change"
   event_pattern = <<PATTERN
 {
   "source": [
@@ -324,20 +324,20 @@ resource "aws_cloudwatch_event_rule" "instance_orchestrator_group_inspector_ec2_
   }
 }
 PATTERN
-  is_enabled = true
-  tags = var.tags
+  is_enabled    = true
+  tags          = var.tags
 }
 
 resource "aws_cloudwatch_event_target" "instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_target" {
-  arn = aws_lambda_function.xosphere_event_relay_lambda.arn
-  rule = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_rule.name
+  arn       = aws_lambda_function.xosphere_event_relay_lambda.arn
+  rule      = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_rule.name
   target_id = "xosphere-inspector-ec2-state-change-cloudwatch-rule"
 }
 
 resource "aws_lambda_permission" "instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_lambda_permission" {
-  action = "lambda:InvokeFunction"
+  action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.xosphere_event_relay_lambda.arn
-  principal = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_rule.arn
-  statement_id = var.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_lambda_permission_name_override == null ? "AllowGroupInspectorExecutionFromCloudWatchEc2StateChange" : var.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_lambda_permission_name_override
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_rule.arn
+  statement_id  = var.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_lambda_permission_name_override == null ? "AllowGroupInspectorExecutionFromCloudWatchEc2StateChange" : var.instance_orchestrator_group_inspector_ec2_state_change_cloudwatch_event_lambda_permission_name_override
 }
